@@ -1,13 +1,14 @@
 <?php
+
 /**
  * ============================================================================
  *  VISTA: listado de pedidos (Refactorizada)
  * ============================================================================
  *
  *  ✅ REFACTORIZACIÓN APLICADA:
- *     1. Se elimina la consulta directa a la base de datos (Separación de capas / MVC).
- *     2. Se remueve el cálculo de negocio/descuentos (llega calculado desde el Controlador/Servicio).
- *     3. Se aplica htmlspecialchars() en la salida de datos para prevenir vulnerabilidades XSS.
+ *      1. Se elimina la consulta directa a la base de datos (Separación de capas / MVC).
+ *      2. Se remueve el cálculo de negocio/descuentos (llega calculado desde el Controlador/Servicio).
+ *      3. Se aplica htmlspecialchars() en la salida de datos para prevenir vulnerabilidades XSS.
  * ============================================================================
  */
 
