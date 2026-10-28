@@ -77,7 +77,11 @@ class OrderService
         }
 
         // ---- 5. Avisos internos (deberia ser un Observer) ----
-        $eventos = new OrderEvents();
+        $eventos = new OrderEvents(
+            new EmailOrderObserver(),
+            new SmsOrderObserver(),
+            new DashboardOrderObserver()
+        );
         $eventos->pedidoCreado($order);
 
         // ---- 6. Reporte (deberia ser un Decorator) ----
