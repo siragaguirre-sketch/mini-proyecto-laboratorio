@@ -1,10 +1,5 @@
 <?php
 
-interface Notification
-{
-    public function send(string $message): void;
-}
-
 final class EmailNotification implements Notification
 {
     public function __construct(private string $to) {}
@@ -32,6 +27,7 @@ final class NotificationFactory
         return match (strtolower($type)) {
             'email' => new EmailNotification($destino),
             'sms'   => new SmsNotification($destino),
+            'legacy' => new LegacyNotifierAdapter(new LegacyNotifier()),
             default => throw new InvalidArgumentException("Tipo de notificación no soportado: {$type}"),
         };
     }
