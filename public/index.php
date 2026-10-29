@@ -6,11 +6,20 @@
  * ============================================================================
  */
 spl_autoload_register(function ($class) {
+    $baseDir = __DIR__ . '/../src/';
+
+    if (str_starts_with($class, 'App\\Models\\')) {
+        $modelFile = $baseDir . 'Models/' . substr($class, strlen('App\\Models\\')) . '.php';
+        if (file_exists($modelFile)) {
+            require_once $modelFile;
+            return;
+        }
+    }
+
     // Normalizar la clase (por si viene con namespace)
     $classFile = str_replace('\\', '/', $class) . '.php';
 
     // 1. Probar en la raíz de src/
-    $baseDir = __DIR__ . '/../src/';
     if (file_exists($baseDir . $classFile)) {
         require_once $baseDir . $classFile;
         return;
