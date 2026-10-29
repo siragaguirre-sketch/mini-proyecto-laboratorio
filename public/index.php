@@ -63,10 +63,10 @@ class SimpleRouter
 {
     private array $routes = [];
 
-    public function addRoute(string $action, string|object $controllerClass, string $method): void
+    public function addRoute(string $action, string|object $controller, string $method): void
     {
         $this->routes[$action] = [
-            'controller' => $controllerClass,
+            'controller' => $controller,
             'method'     => $method,
         ];
     }
@@ -108,14 +108,19 @@ $calculatorFactory = static function (string $tipo): PriceCalculator {
 
     return new PriceCalculator($strategy);
 };
-$orderController = new OrderController(
-    new OrderService(
-        new OrderValidator(),
-        $calculatorFactory,
-        new OrderRepository(),
-        new NotificationSender()
-    )
+$orderService = new OrderService(
+    new OrderValidator(),
+    $calculatorFactory,
+    new OrderRepository(),
+    new NotificationSender(),
+    new OrderEvents(
+        new EmailOrderObserver(),
+        new SmsOrderObserver(),
+        new DashboardOrderObserver()
+    ),
+    new OrderReportService()
 );
+$orderController = new OrderController($orderService);
 
 $router->addRoute('crear', $orderController, 'create');
 $router->addRoute('listar', $orderController, 'index');

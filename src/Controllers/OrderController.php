@@ -28,12 +28,11 @@ class OrderController
     }
 
     /**
-     * ❌ METODO MAL APLICADO: create()
-     *    Mezcla las tres capas de MVC dentro de un solo metodo.
+     * Procesa el pedido mediante la fachada y muestra el reporte generado.
      */
     public function create(): void
     {
-        ['pedido' => $pedido, 'error' => $error] = $this->prepareCreateView($_GET);
+        ['reporte' => $reporte, 'error' => $error] = $this->prepareCreateView($_GET);
         require __DIR__ . '/../../views/order-created.php';
     }
 
@@ -41,18 +40,20 @@ class OrderController
     {
         $error = null;
         try {
-            $pedido = $this->orderService->createOrder(
+            $reporte = $this->orderService->procesarPedidoCompleto(
                 (int) ($input['id'] ?? 1),
                 (string) ($input['paciente'] ?? 'Juan Perez'),
                 (float) ($input['monto'] ?? 15000),
-                (string) ($input['tipo'] ?? 'obra_social')
+                (string) ($input['tipo'] ?? 'obra_social'),
+                (string) ($input['notificacion'] ?? 'email'),
+                (string) ($input['destino'] ?? 'paciente@mail.com')
             );
         } catch (InvalidArgumentException $exception) {
-            $pedido = null;
+            $reporte = null;
             $error = $exception->getMessage();
         }
 
-        return ['pedido' => $pedido, 'error' => $error];
+        return ['reporte' => $reporte, 'error' => $error];
     }
 
     /*
