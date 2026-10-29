@@ -9,6 +9,7 @@ final class OrderReportService
         $report = new ReportGenerator("Pedido {$order->id}");
         $report = new DigitalSignatureDecorator($report);
         $report = new PdfReportDecorator($report);
+        $report = new WatermarkDecorator($report);
 
         return $report->generate() . '<br>'
             . "<p>Pedido {$order->id} procesado. Total: $ {$order->amount}</p>";
