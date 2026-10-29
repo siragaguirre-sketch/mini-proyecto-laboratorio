@@ -39,7 +39,7 @@ class OrderController
         $total = $tipo === 'obra_social' ? $monto * 0.7 : $monto;
 
         // ❌ 3. SQL dentro del controlador (deberia ser Repository)
-        $conexion = Connection::obtener();
+        $conexion = Connection::getInstance();
         $conexion->ejecutar("INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})");
 
         // ❌ 4. Notificacion resuelta otra vez con if (deberia ser Factory)
@@ -85,8 +85,12 @@ class OrderController
      */
     public function report(): void
     {
-        $generador = new ReportGenerator();
-        echo $generador->generate('Pedidos del dia', true, true, true);
+        $reporte = new ReportGenerator('Pedidos del dia');
+        $reporte = new DigitalSignatureDecorator($reporte);
+        $reporte = new PdfReportDecorator($reporte);
+        $reporte = new WatermarkDecorator($reporte);
+
+        echo $reporte->generate();
     }
 }
 

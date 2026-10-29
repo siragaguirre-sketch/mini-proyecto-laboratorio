@@ -91,7 +91,7 @@ class SimpleRouter
 $router = new SimpleRouter();
 $router->addRoute('crear', 'OrderController', 'create');
 $router->addRoute('listar', 'OrderController', 'index');
-$router->addRoute('reporte', 'ReportController', 'generate');
+$router->addRoute('reporte', 'OrderController', 'report');
 
 // Captura de la acción por GET (por defecto 'listar')
 $accion = $_GET['accion'] ?? 'listar';
