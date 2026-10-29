@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Order;
+
 final class DashboardOrderObserver implements OrderObserver
 {
     public function update(Order $order): void

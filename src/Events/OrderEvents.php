@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Order;
+
 final class OrderEvents
 {
     /** @var OrderObserver[] */
