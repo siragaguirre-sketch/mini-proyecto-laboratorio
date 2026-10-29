@@ -23,51 +23,41 @@
 
 class OrderController
 {
+    public function __construct(private OrderService $orderService)
+    {
+    }
+
     /**
      * ❌ METODO MAL APLICADO: create()
      *    Mezcla las tres capas de MVC dentro de un solo metodo.
      */
     public function create(): void
     {
-        // ❌ 1. Entrada sin validar ni sanitizar
-        $id       = (int) ($_GET['id'] ?? 1);
-        $paciente = $_GET['paciente'] ?? 'Juan Perez';
-        $monto    = (float) ($_GET['monto'] ?? 15000);
-        $tipo     = $_GET['tipo'] ?? 'obra_social';
+        ['pedido' => $pedido, 'error' => $error] = $this->prepareCreateView($_GET);
+        require __DIR__ . '/../../views/order-created.php';
+    }
 
-        // ❌ 2. Regla de negocio dentro del controlador (deberia ser Strategy)
-        $total = $tipo === 'obra_social' ? $monto * 0.7 : $monto;
+    private function prepareCreateView(array $input): array
+    {
+        $error = null;
+        try {
+            $pedido = $this->orderService->createOrder(
+                (int) ($input['id'] ?? 1),
+                (string) ($input['paciente'] ?? 'Juan Perez'),
+                (float) ($input['monto'] ?? 15000),
+                (string) ($input['tipo'] ?? 'obra_social')
+            );
+        } catch (InvalidArgumentException $exception) {
+            $pedido = null;
+            $error = $exception->getMessage();
+        }
 
-        // ❌ 3. SQL dentro del controlador (deberia ser Repository)
-        $conexion = Connection::obtener();
-        $conexion->ejecutar("INSERT INTO orders VALUES ({$id}, '{$paciente}', {$total})");
-
-        // ❌ 4. Notificacion resuelta otra vez con if (deberia ser Factory)
-        $notificador = new NotificationSender();
-        $notificador->enviar('email', 'paciente@mail.com', "Pedido {$id} creado");
-
-        // ❌ 5. HTML impreso desde el controlador (deberia ser una View)
-        echo "<h1>Pedido creado</h1>";
-        echo "<p>Paciente: {$paciente}</p>";       // ❌ ademas, sin escapar: XSS
-        echo "<p>Total: $ {$total}</p>";
+        return ['pedido' => $pedido, 'error' => $error];
     }
 
     /*
      * ✅ FORMA CORRECTA:
      *
-     * public function create(): void
-     * {
-     *     $order = new Order(
-     *         (int) $_POST['id'],
-     *         (string) $_POST['paciente'],
-     *         (float) $_POST['monto'],
-     *         (string) $_POST['tipo']
-     *     );
-     *
-     *     $this->facade->createOrder($order);          // toda la logica, una linea
-     *
-     *     require __DIR__ . '/../../views/orders.php'; // la vista solo presenta
-     * }
      */
 
     /**

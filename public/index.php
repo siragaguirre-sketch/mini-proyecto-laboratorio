@@ -6,11 +6,20 @@
  * ============================================================================
  */
 spl_autoload_register(function ($class) {
+    $baseDir = __DIR__ . '/../src/';
+
+    if (str_starts_with($class, 'App\\Models\\')) {
+        $modelFile = $baseDir . 'Models/' . substr($class, strlen('App\\Models\\')) . '.php';
+        if (file_exists($modelFile)) {
+            require_once $modelFile;
+            return;
+        }
+    }
+
     // Normalizar la clase (por si viene con namespace)
     $classFile = str_replace('\\', '/', $class) . '.php';
 
     // 1. Probar en la raíz de src/
-    $baseDir = __DIR__ . '/../src/';
     if (file_exists($baseDir . $classFile)) {
         require_once $baseDir . $classFile;
         return;
@@ -54,7 +63,7 @@ class SimpleRouter
 {
     private array $routes = [];
 
-    public function addRoute(string $action, string $controllerClass, string $method): void
+    public function addRoute(string $action, string|object $controllerClass, string $method): void
     {
         $this->routes[$action] = [
             'controller' => $controllerClass,
@@ -71,15 +80,16 @@ class SimpleRouter
         }
 
         $route = $this->routes[$action];
-        $controllerName = $route['controller'];
+        $controllerReference = $route['controller'];
         $methodName = $route['method'];
 
-        if (class_exists($controllerName)) {
-            $controller = new $controllerName();
-            if (method_exists($controller, $methodName)) {
-                $controller->$methodName();
-                return;
-            }
+        $controller = is_object($controllerReference)
+            ? $controllerReference
+            : (class_exists($controllerReference) ? new $controllerReference() : null);
+
+        if ($controller !== null && method_exists($controller, $methodName)) {
+            $controller->$methodName();
+            return;
         }
 
         http_response_code(500);
@@ -89,9 +99,27 @@ class SimpleRouter
 
 // Inicialización del Router y registro de las rutas según la tabla del README
 $router = new SimpleRouter();
-$router->addRoute('crear', 'OrderController', 'create');
-$router->addRoute('listar', 'OrderController', 'index');
-$router->addRoute('reporte', 'ReportController', 'generate');
+$calculatorFactory = static function (string $tipo): PriceCalculator {
+    $strategy = match ($tipo) {
+        'obra_social' => new InsuranceStrategy(),
+        'jubilado' => new RetireeStrategy(),
+        default => new ParticularStrategy(),
+    };
+
+    return new PriceCalculator($strategy);
+};
+$orderController = new OrderController(
+    new OrderService(
+        new OrderValidator(),
+        $calculatorFactory,
+        new OrderRepository(),
+        new NotificationSender()
+    )
+);
+
+$router->addRoute('crear', $orderController, 'create');
+$router->addRoute('listar', $orderController, 'index');
+$router->addRoute('reporte', $orderController, 'report');
 
 // Captura de la acción por GET (por defecto 'listar')
 $accion = $_GET['accion'] ?? 'listar';
