@@ -32,34 +32,33 @@ class OrderController
      */
     public function create(): void
     {
-        $reporte = $this->orderService->procesarPedidoCompleto(
-            (int) ($_GET['id'] ?? 1),
-            (string) ($_GET['paciente'] ?? 'Juan Perez'),
-            (float) ($_GET['monto'] ?? 15000),
-            (string) ($_GET['tipo'] ?? 'obra_social'),
-            (string) ($_GET['notificacion'] ?? 'email'),
-            (string) ($_GET['destino'] ?? 'paciente@mail.com')
-        );
+        ['reporte' => $reporte, 'error' => $error] = $this->prepareCreateView($_GET);
+        require __DIR__ . '/../../views/order-created.php';
+    }
 
-        echo $reporte;
+    private function prepareCreateView(array $input): array
+    {
+        $error = null;
+        try {
+            $reporte = $this->orderService->procesarPedidoCompleto(
+                (int) ($input['id'] ?? 1),
+                (string) ($input['paciente'] ?? 'Juan Perez'),
+                (float) ($input['monto'] ?? 15000),
+                (string) ($input['tipo'] ?? 'obra_social'),
+                (string) ($input['notificacion'] ?? 'email'),
+                (string) ($input['destino'] ?? 'paciente@mail.com')
+            );
+        } catch (InvalidArgumentException $exception) {
+            $reporte = null;
+            $error = $exception->getMessage();
+        }
+
+        return ['reporte' => $reporte, 'error' => $error];
     }
 
     /*
      * ✅ FORMA CORRECTA:
      *
-     * public function create(): void
-     * {
-     *     $order = new Order(
-     *         (int) $_POST['id'],
-     *         (string) $_POST['paciente'],
-     *         (float) $_POST['monto'],
-     *         (string) $_POST['tipo']
-     *     );
-     *
-     *     $this->facade->createOrder($order);          // toda la logica, una linea
-     *
-     *     require __DIR__ . '/../../views/orders.php'; // la vista solo presenta
-     * }
      */
 
     /**
