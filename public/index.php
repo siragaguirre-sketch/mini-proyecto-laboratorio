@@ -124,7 +124,7 @@ $orderController = new OrderController($orderService);
 
 $router->addRoute('crear', $orderController, 'create');
 $router->addRoute('listar', $orderController, 'index');
-$router->addRoute('reporte', 'ReportController', 'generate');
+$router->addRoute('reporte', $orderController, 'report');
 
 // Captura de la acción por GET (por defecto 'listar')
 $accion = $_GET['accion'] ?? 'listar';

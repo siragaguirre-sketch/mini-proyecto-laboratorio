@@ -6,7 +6,6 @@ final class EmailOrderObserver implements OrderObserver
 {
     public function update(Order $order): void
     {
-        $email = new EmailNotification('paciente@mail.com');
-        $email->send("Pedido {$order->id} creado");
+        (new NotificationSender())->enviar('email', 'paciente@mail.com', "Pedido {$order->id} creado");
     }
 }
