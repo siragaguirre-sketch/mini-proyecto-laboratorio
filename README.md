@@ -1,7 +1,8 @@
 # laboratorio-pedidos — proyecto de práctica
 
 Sistema de gestión de pedidos de un laboratorio de análisis clínicos.
-**PHP Vanilla, sin frameworks, sin Composer.** Corre en XAMPP tal cual está.
+**PHP Vanilla, sin frameworks. Composer se usa para PHPUnit y las pruebas.**
+Corre en XAMPP.
 
 > ⚠️ **Este proyecto está roto a propósito.**
 > Cada archivo contiene deuda técnica sembrada, marcada con comentarios:
@@ -32,6 +33,20 @@ Acciones disponibles:
 
 La persistencia está simulada en memoria para que el proyecto arranque sin
 configurar MySQL. Eso **no** es parte de la deuda a corregir.
+
+---
+
+## Pruebas y CI
+
+Para instalar las dependencias y ejecutar la suite localmente:
+
+```sh
+composer install
+vendor/bin/phpunit tests
+```
+
+GitHub Actions ejecuta los tests con PHP 8.4 en cada `push` y `pull_request`.
+El workflow está en `.github/workflows/ci.yml`.
 
 ---
 
